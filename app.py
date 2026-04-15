@@ -61,6 +61,33 @@ if __name__ == "__main__":
     flask_thread.start()
     
     # تشغيل البوت في الخيط الرئيسي
+    run_bot()        "🎯 **بوت اختبار المكالمات الجماعية**\n\nاختر من القائمة أدناه:",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode="Markdown"
+    )
+
+async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+    text = f"✅ تم اختيار: {data}\n(سيتم إضافة الوظائف لاحقاً)"
+    await query.edit_message_text(text)
+
+# ================== تشغيل البوت ==================
+def run_bot():
+    """تشغيل البوت بطريقة polling"""
+    application = Application.builder().token(BOT_TOKEN).build()
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CallbackQueryHandler(button_handler))
+    application.run_polling()
+
+# ================== نقطة الدخول الرئيسية ==================
+if __name__ == "__main__":
+    # تشغيل Flask في خيط منفصل لضمان بقاء الخدمة نشطة
+    flask_thread = Thread(target=run_flask)
+    flask_thread.start()
+    
+    # تشغيل البوت في الخيط الرئيسي
     run_bot()    )
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
