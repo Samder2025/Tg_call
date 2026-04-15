@@ -12,4 +12,3 @@ DATA_DIR = "data"
 os.makedirs(SESSIONS_DIR, exist_ok=True)
 os.makedirs(DATA_DIR, exist_ok=True)
 
-print("✅ تم تحميل الإعدادات بنجاح")
