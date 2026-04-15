@@ -1,26 +1,30 @@
 import os
 import asyncio
-from flask import Flask
 from threading import Thread
+from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
-# ------------------------- إعدادات البوت -------------------------
+# ================== إعدادات البوت ==================
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 PORT = int(os.getenv("PORT", 8080))
 
-# إنشاء تطبيق Flask
+# ================== خادم Flask لمنع إيقاف الخدمة ==================
 flask_app = Flask(__name__)
 
 @flask_app.route('/')
 def home():
     return "✅ Bot is running!"
 
+@flask_app.route('/health')
+def health():
+    return "OK"
+
 def run_flask():
-    """تشغيل خادم Flask في خيط منفصل"""
+    """تشغيل Flask في خلفية منفصلة"""
     flask_app.run(host='0.0.0.0', port=PORT)
 
-# ------------------------- دوال البوت -------------------------
+# ================== دوال البوت ==================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("➕ إضافة حساب", callback_data="add_account")],
@@ -29,12 +33,35 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🎤 هجوم DoS", callback_data="dos_attack")],
         [InlineKeyboardButton("📊 الحالة", callback_data="status")],
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
         "🎯 **بوت اختبار المكالمات الجماعية**\n\nاختر من القائمة أدناه:",
-        reply_markup=reply_markup,
+        reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode="Markdown"
     )
+
+async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+    text = f"✅ تم اختيار: {data}\n(سيتم إضافة الوظائف لاحقاً)"
+    await query.edit_message_text(text)
+
+# ================== تشغيل البوت ==================
+def run_bot():
+    """تشغيل البوت بطريقة polling"""
+    application = Application.builder().token(BOT_TOKEN).build()
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CallbackQueryHandler(button_handler))
+    application.run_polling()
+
+# ================== نقطة الدخول الرئيسية ==================
+if __name__ == "__main__":
+    # تشغيل Flask في خيط منفصل لضمان بقاء الخدمة نشطة
+    flask_thread = Thread(target=run_flask)
+    flask_thread.start()
+    
+    # تشغيل البوت في الخيط الرئيسي
+    run_bot()    )
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
