@@ -6,7 +6,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters
 
 # ================== إعدادات البوت ==================
-BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "948954784:AAHbcsz-flD6ekzT5i2IN6MorYnoY4EGsPI")
 PORT = int(os.getenv("PORT", 8080))
 
 # ================== خادم Flask لمنع إيقاف الخدمة ==================
